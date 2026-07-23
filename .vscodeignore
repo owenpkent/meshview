@@ -1,0 +1,20 @@
+# Everything not needed inside the packaged .vsix
+.vscode/**
+src/**
+node_modules/**
+esbuild.js
+esbuild.web.js
+tsconfig.json
+.gitignore
+.env
+.env.*
+**/*.map
+*.vsix
+.github/**
+tests/**
+vitest.config.ts
+eslint.config.mjs
+.prettierrc.json
+.prettierignore
+coverage/**
+# Keep: dist/**, media/**, README.md, LICENSE, package.json

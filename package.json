@@ -1,0 +1,120 @@
+{
+  "name": "meshview",
+  "displayName": "MeshView",
+  "description": "View STL 3D models in VS Code. Orbit, pan, zoom with the mouse.",
+  "version": "0.1.0",
+  "publisher": "OwenPKent",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/owenpkent/meshview.git"
+  },
+  "bugs": {
+    "url": "https://github.com/owenpkent/meshview/issues"
+  },
+  "homepage": "https://github.com/owenpkent/meshview#readme",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "stl",
+    "3d",
+    "mesh",
+    "viewer",
+    "three.js",
+    "preview"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "commands": [
+      {
+        "command": "meshview.openPreview",
+        "title": "MeshView: Open STL Preview",
+        "category": "MeshView"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "meshview.stlPreview",
+        "displayName": "MeshView STL Preview",
+        "selector": [
+          {
+            "filenamePattern": "*.stl"
+          },
+          {
+            "filenamePattern": "*.STL"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "meshview.openPreview",
+          "when": "resourceExtname =~ /\\.stl$/i",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "MeshView",
+      "properties": {
+        "meshview.showGrid": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a grid under the model."
+        },
+        "meshview.meshColor": {
+          "type": "string",
+          "default": "#8ab4f8",
+          "description": "Color of the mesh material."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "build:ext": "node esbuild.js",
+    "build:web": "node esbuild.web.js",
+    "compile": "npm run check-types && npm run build:ext && npm run build:web",
+    "watch:ext": "node esbuild.js --watch",
+    "watch:web": "node esbuild.web.js --watch",
+    "watch": "npm-run-all -p watch:*",
+    "package": "npm run check-types && node esbuild.js --production && node esbuild.web.js --production",
+    "vscode:prepublish": "npm run package",
+    "vsix": "vsce package"
+  },
+  "dependencies": {
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^20.14.0",
+    "@types/three": "^0.185.1",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.28.1",
+    "eslint": "^9.39.5",
+    "globals": "^17.7.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.65.0",
+    "vitest": "^4.1.10"
+  },
+  "allowScripts": {
+    "@vscode/vsce-sign@2.0.9": true,
+    "esbuild@0.28.1": true,
+    "keytar@7.9.0": true
+  }
+}

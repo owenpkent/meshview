@@ -1,0 +1,6 @@
+dist
+coverage
+media/webview.js
+node_modules
+*.vsix
+package-lock.json

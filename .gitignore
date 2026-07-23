@@ -1,0 +1,10 @@
+node_modules/
+dist/
+media/webview.js
+media/webview.js.map
+coverage/
+*.vsix
+.DS_Store
+.env
+.env.local
+.env.*.local
