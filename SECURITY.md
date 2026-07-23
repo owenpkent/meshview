@@ -15,7 +15,15 @@ MeshView reads binary or ASCII STL files you open and renders them with Three.js
 
 ## Content Security Policy
 
-The webview is served with a strict CSP: `default-src 'none'`, and `script-src` restricted to the webview's own `cspSource`. There is no remote resource loading, and the bundle is loaded through `webview.asWebviewUri` with `localResourceRoots` limited to the extension's `media` folder, so the only scripts that can run are ones shipped inside the extension.
+The webview is served with a strict CSP, set in `src/stlEditor.ts`:
+
+```
+default-src 'none'; style-src ${cspSource} 'unsafe-inline'; script-src ${cspSource}; font-src ${cspSource}
+```
+
+`default-src 'none'` denies everything not named explicitly, so there is no remote resource loading and no `connect-src` for the webview to talk to the network. The bundle is loaded through `webview.asWebviewUri` with `localResourceRoots` limited to the extension's `media` folder, so the only scripts that can run are ones shipped inside the extension.
+
+`style-src` allows `'unsafe-inline'` because the panel's layout ships as an inline `<style>` block in the webview HTML. This relaxes CSS only: `script-src` carries no `'unsafe-inline'` and no `'unsafe-eval'`, so inline event handlers and injected `<script>` tags stay blocked. Nothing in the webview writes untrusted input to an HTML sink either (no `innerHTML`, `insertAdjacentHTML`, or `document.write` anywhere in the extension); file names and parse errors reach the panel through `textContent`, which does not parse markup.
 
 ## STL parsing
 
