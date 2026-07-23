@@ -7,6 +7,55 @@ export interface StlSniffResult {
   triangles: number | null;
 }
 
+// Normalize whatever the extension host's postMessage payload turned into back
+// to a Uint8Array. The webview transport does not always preserve the typed
+// array: depending on the VS Code version and the message path, a Uint8Array can
+// arrive as a real Uint8Array, a bare ArrayBuffer, a numeric-keyed plain object
+// ({"0":12,"1":34,...}, what JSON.stringify makes of a typed array), or a
+// serialized Node Buffer ({type:'Buffer',data:[...]}). `new Uint8Array(obj)` on
+// the last two reads a missing `.length` and silently yields a ZERO-length
+// array, which downstream looks exactly like a truncated file, so each shape has
+// to be handled explicitly.
+export function toBytes(input: unknown): Uint8Array {
+  if (input instanceof Uint8Array) {
+    return input;
+  }
+  if (input instanceof ArrayBuffer) {
+    return new Uint8Array(input);
+  }
+  if (ArrayBuffer.isView(input)) {
+    return new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
+  }
+  if (Array.isArray(input)) {
+    return Uint8Array.from(input as number[]);
+  }
+  if (input !== null && typeof input === 'object') {
+    const obj = input as Record<string, unknown>;
+    if (obj.type === 'Buffer' && Array.isArray(obj.data)) {
+      return Uint8Array.from(obj.data as number[]);
+    }
+    // Lost its prototype but kept a usable length: treat as array-like.
+    if (typeof obj.length === 'number') {
+      return Uint8Array.from(obj as unknown as ArrayLike<number>);
+    }
+    // Numeric keys, no length. Size from the highest index so a payload with a
+    // gap still lands each byte at its original offset.
+    const keys = Object.keys(obj).filter((k) => /^\d+$/.test(k));
+    if (keys.length > 0) {
+      let max = -1;
+      for (const k of keys) {
+        max = Math.max(max, Number(k));
+      }
+      const out = new Uint8Array(max + 1);
+      for (const k of keys) {
+        out[Number(k)] = Number(obj[k]) & 0xff;
+      }
+      return out;
+    }
+  }
+  return new Uint8Array(0);
+}
+
 // Detect whether `bytes` looks like an ASCII or binary STL, and (for binary)
 // read the declared triangle count out of the 80-byte header.
 export function sniffStl(bytes: Uint8Array): StlSniffResult {

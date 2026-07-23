@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { checkStl } from './stlInfo';
+import { checkStl, toBytes } from './stlInfo';
 
 interface VsCodeApi {
   postMessage(message: unknown): void;
@@ -10,7 +10,9 @@ interface VsCodeApi {
 interface LoadMessage {
   type: 'load';
   name: string;
-  bytes: Uint8Array | ArrayLike<number>;
+  // Shape depends on what the webview transport did to the host's Uint8Array;
+  // toBytes() normalizes it. See stlInfo.ts.
+  bytes: unknown;
   showGrid: boolean;
   meshColor: string;
 }
@@ -101,7 +103,14 @@ function showError(message: string): void {
 }
 
 function loadModel(msg: LoadMessage): void {
-  const raw = msg.bytes instanceof Uint8Array ? msg.bytes : new Uint8Array(msg.bytes);
+  const raw = toBytes(msg.bytes);
+
+  // An empty payload means the message never carried the file, which is a very
+  // different problem from a bad file; say so rather than blaming the STL.
+  if (raw.byteLength === 0) {
+    showError(`MeshView received no data for ${msg.name}. The file may be empty.`);
+    return;
+  }
 
   // Guard against malformed/malicious STL before allocating: a binary header can
   // over-claim its triangle count and make STLLoader allocate tens of GB.
