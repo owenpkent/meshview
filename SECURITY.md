@@ -15,11 +15,11 @@ MeshView reads binary or ASCII STL files you open and renders them with Three.js
 
 ## Content Security Policy
 
-The webview is served with a strict CSP and a nonce per load: only the nonce-tagged bundle script can run, there is no remote resource loading, and all local assets (the script) are loaded through `webview.asWebviewUri` with `localResourceRoots` limited to the extension's `media` folder.
+The webview is served with a strict CSP: `default-src 'none'`, and `script-src` restricted to the webview's own `cspSource`. There is no remote resource loading, and the bundle is loaded through `webview.asWebviewUri` with `localResourceRoots` limited to the extension's `media` folder, so the only scripts that can run are ones shipped inside the extension.
 
 ## STL parsing
 
-STL bytes are read by the extension host with `workspace.fs.readFile` and handed to the webview, which parses binary and ASCII STL locally (no network access, no shelling out). Parsing is defensive against malformed input (truncated files, bad triangle counts); a file that fails to parse shows an error in the panel instead of crashing the extension host.
+STL bytes are read by the extension host with `workspace.fs.readFile` and handed to the webview, which parses binary and ASCII STL locally (no network access, no shelling out). Parsing is defensive against malformed input: before any geometry is allocated, `checkStl()` rejects a binary header whose declared triangle count exceeds what the file can actually hold (an ~84-byte crafted file can otherwise claim ~4.29 billion triangles and drive a multi-gigabyte allocation), and caps loads at 10 million triangles. A file that is rejected or fails to parse shows an error in the panel instead of crashing the extension host.
 
 ## Reporting a vulnerability
 

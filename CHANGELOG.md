@@ -4,6 +4,14 @@ All notable changes to MeshView are documented here. The format follows [Keep a 
 
 ## [Unreleased]
 
+### Added
+
+- **Guards against malformed and oversized STL files.** Before allocating geometry, MeshView rejects a binary STL whose header declares more triangles than the file can hold, and caps loads at 10 million triangles. Both cases show an explanatory message in the panel instead of hanging the viewer on a huge allocation.
+
+### Fixed
+
+- **Valid STL files no longer fail to load with "File is too short to be a valid STL."** File bytes did not always survive the trip from the extension host to the webview as a typed array; when they arrived as a plain object they were silently rebuilt as an empty array, and every file looked truncated. The payload is now normalized back to a `Uint8Array` whatever shape it arrives in, and a genuinely empty payload reports itself as such rather than blaming the file.
+
 ## [0.1.0] - 2026-07-23
 
 ### Added

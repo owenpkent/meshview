@@ -43,12 +43,12 @@ Run `npm run format` before committing so `format:check` stays green. CI runs `l
 npm test          # vitest run (what CI runs)
 ```
 
-Unit tests live in `tests/` and cover the pure, host-independent logic (STL parsing and stats in `src/webview/stlInfo.ts`).
+Unit tests live in `tests/` and cover the pure, host-independent logic in `src/webview/stlInfo.ts`: format sniffing, the safety checks that gate parsing, and normalizing the byte payload that arrives from the extension host.
 
 ## Debug
 
-1. Run `npm run watch` (or `npm run compile` once).
-2. Press **F5** in VS Code. This launches the Extension Development Host with MeshView loaded.
+1. Run `npm run watch` (or let step 2 build for you).
+2. Press **F5** in VS Code. The `Run Extension` config in `.vscode/launch.json` builds first (the `npm: compile` task) and launches the Extension Development Host with MeshView loaded, opening `samples/` so there is something to click.
 3. In the new window, open any `.stl` file. It should open automatically in the MeshView preview; if not, run **MeshView: Open STL Preview** from the Command Palette or right-click the file in the Explorer.
 4. Orbit (left-drag), pan (right-drag), and zoom (scroll wheel) to exercise the viewer, and try the toolbar's fit-view, wireframe, and grid toggles.
 
@@ -56,15 +56,18 @@ To debug the webview itself, open **Developer: Open Webview Developer Tools** fr
 
 ## Project layout
 
-| Path                           | What lives here                                                         |
-| ------------------------------ | ----------------------------------------------------------------------- |
-| `src/extension.ts`             | Host: activation and command registration.                              |
-| `src/stlEditor.ts`             | Host: read-only custom editor for `.stl` files, webview lifecycle.      |
-| `src/webview/main.ts`          | Webview: Three.js scene, mouse controls, toolbar, stats overlay.        |
-| `src/webview/stlInfo.ts`       | Pure STL parsing and stats (triangle count, bounding box); unit-tested. |
-| `tests/`                       | Vitest unit tests.                                                      |
-| `media/`                       | Built webview bundle and static webview assets.                         |
-| `esbuild.js`, `esbuild.web.js` | The bundlers (extension host and webview respectively).                 |
+| Path                           | What lives here                                                           |
+| ------------------------------ | ------------------------------------------------------------------------- |
+| `src/extension.ts`             | Host: activation and command registration.                                |
+| `src/stlEditor.ts`             | Host: read-only custom editor for `.stl` files, webview lifecycle.        |
+| `src/webview/main.ts`          | Webview: Three.js scene, mouse controls, toolbar, stats overlay.          |
+| `src/webview/stlInfo.ts`       | Pure STL sniffing, safety checks, and payload normalization; unit-tested. |
+| `tests/`                       | Vitest unit tests.                                                        |
+| `media/`                       | Built webview bundle and static webview assets.                           |
+| `samples/`                     | Small binary and ASCII STL files for manual testing.                      |
+| `scripts/`                     | Repo tooling (for example `make-icon.mjs`, run via `npm run icon`).       |
+| `.vscode/`                     | Debug launch config and the build task F5 runs.                           |
+| `esbuild.js`, `esbuild.web.js` | The bundlers (extension host and webview respectively).                   |
 
 ## Coding conventions
 
