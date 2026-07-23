@@ -1,0 +1,25 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- MeshView marketplace icon: an isometric cube rendered as a triangulated
+       mesh (wireframe over shaded facets), hinting at an STL model. -->
+  <rect x="0" y="0" width="128" height="128" rx="26" fill="#0d1117" />
+
+  <!-- Face fills (solid shading), darkest on the right/shadow side. -->
+  <!-- Top face -->
+  <polygon points="64,18 110,45 64,72 18,45" fill="#8ab4f8" fill-opacity="0.55" />
+  <!-- Left face, split into two triangles by a diagonal -->
+  <polygon points="18,45 64,72 64,118" fill="#8ab4f8" fill-opacity="0.32" />
+  <polygon points="18,45 64,118 18,91" fill="#8ab4f8" fill-opacity="0.20" />
+  <!-- Right face, split into two triangles by a diagonal -->
+  <polygon points="110,45 64,72 64,118" fill="#8ab4f8" fill-opacity="0.22" />
+  <polygon points="110,45 64,118 110,91" fill="#8ab4f8" fill-opacity="0.12" />
+
+  <!-- Wireframe: outer silhouette + internal mesh edges -->
+  <g fill="none" stroke="#8ab4f8" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round">
+    <!-- outer silhouette -->
+    <polygon points="64,18 110,45 110,91 64,118 18,91 18,45" />
+    <!-- edges meeting at the cube's front-center vertex -->
+    <path d="M64,18 L64,72 M18,45 L64,72 M110,45 L64,72 M64,72 L64,118" />
+    <!-- triangulating diagonals on the two visible side faces -->
+    <path d="M18,45 L64,118 M110,45 L64,118" />
+  </g>
+</svg>

@@ -20,4 +20,5 @@ coverage/**
 RELEASING.md
 scripts/**
 samples/**
-# Keep: dist/**, media/**, README.md, LICENSE, package.json
+media/icon.svg
+# Keep: dist/**, media/icon.png, README.md, LICENSE, package.json
