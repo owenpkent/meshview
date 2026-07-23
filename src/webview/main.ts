@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { checkStl } from './stlInfo';
 
 interface VsCodeApi {
   postMessage(message: unknown): void;
@@ -95,12 +96,31 @@ function fitView(): void {
   controls.update();
 }
 
+function showError(message: string): void {
+  statsEl.textContent = message;
+}
+
 function loadModel(msg: LoadMessage): void {
   const raw = msg.bytes instanceof Uint8Array ? msg.bytes : new Uint8Array(msg.bytes);
+
+  // Guard against malformed/malicious STL before allocating: a binary header can
+  // over-claim its triangle count and make STLLoader allocate tens of GB.
+  const check = checkStl(raw);
+  if (!check.ok) {
+    showError(check.reason ?? 'Could not load this STL file.');
+    return;
+  }
+
   const buffer = raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength) as ArrayBuffer;
 
   const loader = new STLLoader();
-  const geometry = loader.parse(buffer);
+  let geometry: THREE.BufferGeometry;
+  try {
+    geometry = loader.parse(buffer);
+  } catch (err) {
+    showError(`Could not parse this STL file (${String(err)}).`);
+    return;
+  }
   geometry.computeBoundingBox();
   const box = geometry.boundingBox as THREE.Box3;
   const size = new THREE.Vector3();

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { sniffStl } from '../src/webview/stlInfo';
+import { checkStl, MAX_TRIANGLES, sniffStl } from '../src/webview/stlInfo';
 
 // Build a minimal binary STL buffer: 80-byte header + uint32 LE triangle count
 // + `count` triangles of 50 bytes each (12 floats + a uint16 attribute count).
@@ -56,5 +56,44 @@ describe('sniffStl', () => {
     const bytes = new Uint8Array(84).fill(0xff);
     // bytes 80-83 are all 0xff -> 4294967295 as an unsigned LE uint32
     expect(sniffStl(bytes)).toEqual({ format: 'binary', triangles: 4294967295 });
+  });
+});
+
+describe('checkStl', () => {
+  it('accepts a well-formed binary STL', () => {
+    const r = checkStl(makeBinaryStl(10));
+    expect(r.ok).toBe(true);
+    expect(r).toMatchObject({ format: 'binary', triangles: 10 });
+  });
+
+  it('rejects a binary header that over-claims its triangle count (amplification)', () => {
+    // 84-byte file, but the header declares ~4.29B triangles.
+    const r = checkStl(new Uint8Array(84).fill(0xff));
+    expect(r.ok).toBe(false);
+    expect(r.reason).toMatch(/more than the file can hold/i);
+  });
+
+  it('rejects when the declared count needs more bytes than the file holds', () => {
+    // Header claims 10 triangles, only 3 worth of bytes present.
+    expect(checkStl(makeBinaryStl(10, 3)).ok).toBe(false);
+  });
+
+  it('rejects a consistent file that still exceeds the triangle cap', () => {
+    const r = checkStl(makeBinaryStl(12), 1);
+    expect(r.ok).toBe(false);
+    expect(r.reason).toMatch(/limit/i);
+  });
+
+  it('rejects a file too short to be a valid STL', () => {
+    expect(checkStl(new Uint8Array(5)).ok).toBe(false);
+  });
+
+  it('allows ASCII STL (allocation bounded by file length)', () => {
+    const bytes = new TextEncoder().encode(makeAsciiStl());
+    expect(checkStl(bytes)).toMatchObject({ ok: true, format: 'ascii' });
+  });
+
+  it('exposes a positive default triangle cap', () => {
+    expect(MAX_TRIANGLES).toBeGreaterThan(0);
   });
 });
