@@ -20,6 +20,10 @@ View STL 3D models directly in VS Code. Opens `.stl` files in a Three.js viewer 
 
 Open any `.stl` file in the workspace and it opens in the MeshView preview automatically. Use the `MeshView: Open STL Preview` command, or right-click an `.stl` file in the Explorer, to open it explicitly.
 
+### Try it
+
+No model handy? Open [`samples/cube-binary.stl`](samples/cube-binary.stl) (or the ASCII variant, [`samples/cube-ascii.stl`](samples/cube-ascii.stl)) in this repo to see a simple unit cube in the viewer.
+
 ## Commands
 
 | Command                | Description                                                      |

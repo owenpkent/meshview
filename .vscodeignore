@@ -17,4 +17,7 @@ eslint.config.mjs
 .prettierrc.json
 .prettierignore
 coverage/**
+RELEASING.md
+scripts/**
+samples/**
 # Keep: dist/**, media/**, README.md, LICENSE, package.json
