@@ -1,5 +1,9 @@
 # MeshView
 
+[![CI](https://github.com/owenpkent/meshview/actions/workflows/ci.yml/badge.svg)](https://github.com/owenpkent/meshview/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![VS Code Marketplace](https://vsmarketplacebadges.dev/version-short/OwenPKent.meshview.svg?label=VS%20Code%20Marketplace&color=007ACC)](https://marketplace.visualstudio.com/items?itemName=OwenPKent.meshview)
+
 View STL 3D models directly in VS Code. Opens `.stl` files in a Three.js viewer with orbit, pan, and zoom.
 
 ## Features
@@ -39,6 +43,10 @@ npm test
 npm run compile    # type-check + build both bundles
 npm run vsix       # package a .vsix
 ```
+
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup, build, lint, and test instructions, and the [Code of Conduct](CODE_OF_CONDUCT.md) for community guidelines.
 
 ## License
 

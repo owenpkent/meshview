@@ -1,0 +1,75 @@
+name: Bug report
+description: Report something that is not working as expected
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to file a bug. Please fill in the details below.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: A clear description of the bug.
+      placeholder: The model loads rotated 90 degrees off from how it looks in other viewers.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Attach or describe the .stl file if you can.
+      placeholder: |
+        1. Open this .stl ...
+        2. Orbit / pan / zoom ...
+        3. Toggle wireframe or grid ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: stl-info
+    attributes:
+      label: STL file characteristics (if relevant)
+      description: Binary or ASCII, roughly how large, triangle count if known.
+      placeholder: Binary STL, ~40 MB, ~2.1M triangles
+
+  - type: input
+    id: vscode-version
+    attributes:
+      label: VS Code version
+      placeholder: 1.90.0
+    validations:
+      required: true
+
+  - type: input
+    id: extension-version
+    attributes:
+      label: MeshView version
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: Windows 11, macOS 14, Ubuntu 24.04
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Logs, screenshots, or notes.
