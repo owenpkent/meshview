@@ -35,7 +35,12 @@ export class StlEditorProvider implements vscode.CustomReadonlyEditorProvider {
         void webview.postMessage({
           type: 'load',
           name: basename(document.uri),
-          bytes,
+          // Base64, not the raw Uint8Array. The webview transport JSON-encodes
+          // messages, and JSON turns a typed array into a numeric-keyed object
+          // ~13x the size of the file (a 5 MB STL becomes ~67 MB of JSON and
+          // several hundred MB of objects). Base64 costs 1.33x and stays a
+          // string end to end. toBytes() in src/webview/stlInfo.ts decodes it.
+          bytes: Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString('base64'),
           showGrid: cfg.get<boolean>('showGrid', true),
           meshColor: cfg.get<string>('meshColor', '#8ab4f8'),
         });

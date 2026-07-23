@@ -15,6 +15,7 @@ View STL 3D models directly in VS Code. Opens `.stl` files in a Three.js viewer 
 - Toolbar: Fit view, wireframe toggle, grid toggle.
 - Stats overlay: triangle count and bounding-box dimensions (X x Y x Z).
 - Follows the active VS Code color theme.
+- Rejects corrupt or hostile files: a binary STL claiming more triangles than it holds, or any model above 10 million triangles, shows a message in the panel instead of hanging the viewer on a huge allocation.
 
 ## Getting started
 
