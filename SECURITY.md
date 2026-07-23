@@ -27,7 +27,7 @@ default-src 'none'; style-src ${cspSource} 'unsafe-inline'; script-src ${cspSour
 
 ## STL parsing
 
-STL bytes are read by the extension host with `workspace.fs.readFile` and handed to the webview, which parses binary and ASCII STL locally (no network access, no shelling out). Parsing is defensive against malformed input: before any geometry is allocated, `checkStl()` rejects a binary header whose declared triangle count exceeds what the file can actually hold (an ~84-byte crafted file can otherwise claim ~4.29 billion triangles and drive a multi-gigabyte allocation), and caps loads at 10 million triangles. A file that is rejected or fails to parse shows an error in the panel instead of crashing the extension host.
+STL bytes are read by the extension host with `workspace.fs.readFile` and handed to the webview as base64 (the webview message channel is JSON, which does not preserve a typed array), where `toBytes()` decodes them. Parsing of binary and ASCII STL happens locally in the webview (no network access, no shelling out). Reconstruction is bounded: `toBytes()` never sizes an allocation from an attacker-controlled length or key, so a malformed message returns an empty payload and an error in the panel rather than a multi-gigabyte allocation. Parsing is defensive against malformed input: before any geometry is allocated, `checkStl()` rejects a binary header whose declared triangle count exceeds what the file can actually hold (an ~84-byte crafted file can otherwise claim ~4.29 billion triangles and drive a multi-gigabyte allocation), and caps loads at 10 million triangles. A file that is rejected or fails to parse shows an error in the panel instead of crashing the extension host.
 
 ## Reporting a vulnerability
 

@@ -61,6 +61,24 @@ describe('sniffStl', () => {
 
 describe('toBytes', () => {
   const source = new Uint8Array([1, 2, 250, 0, 42]);
+  const toBase64 = (bytes: Uint8Array): string => btoa(String.fromCharCode(...Array.from(bytes)));
+
+  it('decodes the base64 string the extension host actually sends', () => {
+    expect(Array.from(toBytes(toBase64(source)))).toEqual([1, 2, 250, 0, 42]);
+  });
+
+  it('round-trips a full binary STL through base64', () => {
+    const stl = makeBinaryStl(12);
+    const rebuilt = toBytes(toBase64(stl));
+    expect(rebuilt.byteLength).toBe(stl.byteLength);
+    expect(Array.from(rebuilt)).toEqual(Array.from(stl));
+    expect(checkStl(rebuilt)).toMatchObject({ ok: true, triangles: 12 });
+  });
+
+  it('returns empty for a string that is not base64, rather than throwing', () => {
+    expect(toBytes('not base64 !!').byteLength).toBe(0);
+    expect(toBytes('').byteLength).toBe(0);
+  });
 
   it('passes a real Uint8Array through untouched', () => {
     expect(toBytes(source)).toBe(source);
@@ -94,6 +112,28 @@ describe('toBytes', () => {
     expect(Array.from(toBytes({ '0': 7, '3': 9 }))).toEqual([7, 0, 0, 9]);
   });
 
+  it('rebuilds from an array-like object that kept its length', () => {
+    expect(Array.from(toBytes({ '0': 1, '1': 2, '2': 250, length: 3 }))).toEqual([1, 2, 250]);
+  });
+
+  it('refuses a bare {length} rather than fabricating that many zero bytes', () => {
+    // Uint8Array.from({length: 200}) yields 200 zeros, which sniff as a valid
+    // empty binary STL and reach STLLoader as a degenerate model.
+    expect(toBytes({ length: 200 }).byteLength).toBe(0);
+  });
+
+  it('ignores a length past the payload cap and rebuilds from the real keys', () => {
+    // The bogus length never sizes an allocation; the numeric-key path takes
+    // over and is bounded by the indices actually present.
+    const out = toBytes({ '0': 1, '1': 2, length: Number.MAX_SAFE_INTEGER });
+    expect(Array.from(out)).toEqual([1, 2]);
+  });
+
+  it('refuses an out-of-range numeric key instead of throwing RangeError', () => {
+    expect(toBytes({ '999999999999': 1 }).byteLength).toBe(0);
+    expect(toBytes({ '0': 7, '4294967295': 9 }).byteLength).toBe(0);
+  });
+
   it('survives a full binary STL making the JSON round trip', () => {
     const stl = makeBinaryStl(12);
     const rebuilt = toBytes(JSON.parse(JSON.stringify(stl)));
@@ -104,7 +144,7 @@ describe('toBytes', () => {
   it('returns an empty array for junk rather than throwing', () => {
     expect(toBytes(null).byteLength).toBe(0);
     expect(toBytes(undefined).byteLength).toBe(0);
-    expect(toBytes('nope').byteLength).toBe(0);
+    expect(toBytes(42).byteLength).toBe(0);
     expect(toBytes({}).byteLength).toBe(0);
   });
 });

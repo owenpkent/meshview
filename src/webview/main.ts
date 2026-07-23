@@ -10,8 +10,8 @@ interface VsCodeApi {
 interface LoadMessage {
   type: 'load';
   name: string;
-  // Shape depends on what the webview transport did to the host's Uint8Array;
-  // toBytes() normalizes it. See stlInfo.ts.
+  // Base64 from the extension host, but typed loosely because the transport can
+  // reshape a payload; toBytes() normalizes whatever arrives. See stlInfo.ts.
   bytes: unknown;
   showGrid: boolean;
   meshColor: string;
@@ -105,10 +105,12 @@ function showError(message: string): void {
 function loadModel(msg: LoadMessage): void {
   const raw = toBytes(msg.bytes);
 
-  // An empty payload means the message never carried the file, which is a very
-  // different problem from a bad file; say so rather than blaming the STL.
+  // An empty payload means the file never made it across, which is a different
+  // problem from a bad file; do not report it as a malformed STL.
   if (raw.byteLength === 0) {
-    showError(`MeshView received no data for ${msg.name}. The file may be empty.`);
+    showError(
+      `MeshView received no data for ${msg.name}. The file is empty, or the preview could not decode the message.`,
+    );
     return;
   }
 
