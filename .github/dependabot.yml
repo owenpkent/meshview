@@ -9,6 +9,10 @@ updates:
       # TypeScript 7.x is a compiler rewrite; stay on the 5.x major.
       - dependency-name: typescript
         update-types: ['version-update:semver-major']
+      # The extension host runs VS Code's bundled Node, not the latest release,
+      # so don't let @types/node drift a major ahead of the supported runtime.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     groups:
       dev-dependencies:
         dependency-type: development
